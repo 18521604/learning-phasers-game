@@ -28,7 +28,7 @@ export class MenuScene extends BaseScene {
         textGameObj.on("pointerout", () => {
             textGameObj.setStyle({ fill: "#fff" });
         });
-        textGameObj.on("pointerdown", () => {
+        textGameObj.on("pointerup", () => {
             this.scene.start(menuItem["scene"]);
 
             if (menuItem["text"] === "Exit") {

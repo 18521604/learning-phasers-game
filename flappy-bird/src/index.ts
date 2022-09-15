@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { BestScoreScene } from "./scenes/bestScoreScene";
 import { GameScene } from "./scenes/gameScene";
 import { MenuScene } from "./scenes/menuScene";
+import { PauseScene } from "./scenes/pauseScene";
 import { PreloadScene } from "./scenes/preloadScene";
 
 let game: any;
@@ -16,7 +17,13 @@ window.onload = function () {
         birdPosition: BIRD_POSITION,
     };
 
-    const scenes = [PreloadScene, MenuScene, BestScoreScene, GameScene];
+    const scenes = [
+        PreloadScene,
+        MenuScene,
+        BestScoreScene,
+        GameScene,
+        PauseScene,
+    ];
     const createScene = (scene: any) => new scene(SHARED_CONFIG);
     const initScenes = scenes.map(createScene);
 
@@ -25,9 +32,12 @@ window.onload = function () {
         ...SHARED_CONFIG,
         physics: {
             default: "arcade",
-            arcade: { debug: true },
+            arcade: {
+                debug: true,
+            },
         },
         scene: initScenes,
+        pixelArt: true,
     };
 
     game = new Phaser.Game(config);

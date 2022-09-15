@@ -12,6 +12,7 @@ export class GameScene extends BaseScene {
     bird: any;
     sky: any;
     pauseButton: any;
+    isPaused: any;
 
     //Score constructor
     score: any;
@@ -20,9 +21,30 @@ export class GameScene extends BaseScene {
     bestScoreText: any;
 
     pipesGroup: any;
-    pipeVerticalDistanceRange: any;
-    pipeHorizontalDistanceRange: any;
     flapVelocity: any;
+
+    //CountDown
+    initialTime: any;
+    countDownText: any;
+    timeEvent: any;
+    pauseEvent: any;
+
+    //difficulty
+    currentDifficulty: any = "easy";
+    listDifficulties = {
+        easy: {
+            pipeHorizontalDistanceRange: [400, 500],
+            pipeVerticalDistanceRange: [150, 200],
+        },
+        normal: {
+            pipeHorizontalDistanceRange: [280, 330],
+            pipeVerticalDistanceRange: [140, 190],
+        },
+        hard: {
+            pipeHorizontalDistanceRange: [250, 310],
+            pipeVerticalDistanceRange: [130, 180],
+        },
+    };
 
     constructor(config: any) {
         super("GameScene", config);
@@ -30,13 +52,12 @@ export class GameScene extends BaseScene {
         this.config = config;
 
         this.flapVelocity = 300;
-        this.pipeVerticalDistanceRange = [130, 200];
-        this.pipeHorizontalDistanceRange = [400, 600];
 
         this.score = 0;
     }
 
     create() {
+        this.currentDifficulty = "easy";
         super.create();
         this.createBirds();
         this.createPipes();
@@ -44,6 +65,19 @@ export class GameScene extends BaseScene {
         this.createScore();
         this.handleInputs();
         this.createColliders();
+        this.listenToEvents();
+
+        this.anims.create({
+            key: "fly",
+            frames: this.anims.generateFrameNumbers("bird", {
+                start: 8,
+                end: 15,
+            }),
+            frameRate: 8,
+            repeat: -1,
+        });
+
+        this.bird.play("fly");
     }
 
     update(time: number, delta: number): void {
@@ -59,12 +93,16 @@ export class GameScene extends BaseScene {
     }
 
     createBirds() {
-        this.bird = this.physics.add.sprite(
-            this.config.birdPosition.x,
-            this.config.birdPosition.y,
-            ImagesScene.Bird
-        );
-        this.bird.body.gravity.y = 500;
+        this.bird = this.physics.add
+            .sprite(
+                this.config.birdPosition.x,
+                this.config.birdPosition.y,
+                ImagesScene.Bird
+            )
+            .setFlipX(true)
+            .setScale(3);
+        this.bird.setBodySize(this.bird.width, this.bird.height - 8);
+        this.bird.body.gravity.y = 400;
         this.bird.setCollideWorldBounds(true);
     }
 
@@ -87,9 +125,11 @@ export class GameScene extends BaseScene {
         this.pauseButton.depth = 5;
         this.pauseButton.setInteractive();
 
-        this.pauseButton.on("pointerdown", () => {
+        this.pauseButton.on("pointerup", () => {
+            this.isPaused = true;
             this.physics.pause();
             this.scene.pause();
+            this.scene.launch("PauseScene");
         });
     }
 
@@ -113,8 +153,8 @@ export class GameScene extends BaseScene {
     }
 
     handleInputs() {
-        this.input.on("pointerdown", this.flapBird, this);
-        this.input.keyboard.on("keydown_SPACE", this.flapBird, this);
+        this.input.on("pointerup", this.flapBird, this);
+        this.input.keyboard.on("keydown-SPACE", this.flapBird, this);
     }
 
     createColliders() {
@@ -137,6 +177,9 @@ export class GameScene extends BaseScene {
     }
 
     flapBird() {
+        if (this.isPaused) {
+            return;
+        }
         this.bird.body.velocity.y = -this.flapVelocity;
     }
 
@@ -150,32 +193,40 @@ export class GameScene extends BaseScene {
     gameOver() {
         this.physics.pause();
         this.bird.setTint(0x732335);
-
         this.saveBestScore();
+
+        this.add.text(
+            this.screenCenter[0],
+            this.screenCenter[1],
+            "GAME OVER!",
+            this.fontOptions
+        );
+
         this.time.addEvent({
             delay: 1000,
             callback: () => {
-                this.scene.restart();
+                // this.scene.restart();
+                this.scene.start("MenuScene");
             },
             loop: false,
         });
     }
 
     placePipe() {
+        const difficulty = this.listDifficulties[this.currentDifficulty];
         const pipeRightMostX = this.getPipeRightMostX();
         const pipeVerticalDistance = Phaser.Math.Between(
-            this.pipeVerticalDistanceRange[0],
-            this.pipeVerticalDistanceRange[1]
+            difficulty.pipeVerticalDistanceRange[0],
+            difficulty.pipeVerticalDistanceRange[1]
         );
         const pipeVerticalPosition = Phaser.Math.Between(
             0 + 20,
             Number(this.config.height) - 20 - pipeVerticalDistance
         );
         const pipeHorizontalDistance = Phaser.Math.Between(
-            this.pipeHorizontalDistanceRange[0],
-            this.pipeHorizontalDistanceRange[1]
+            difficulty.pipeHorizontalDistanceRange[0],
+            difficulty.pipeHorizontalDistanceRange[1]
         );
-
         const upperPipe = this.pipesGroup
             .create(
                 pipeRightMostX + pipeHorizontalDistance,
@@ -192,7 +243,7 @@ export class GameScene extends BaseScene {
             )
             .setImmovable(true)
             .setOrigin(0);
-        this.pipesGroup.setVelocityX(-300);
+        this.pipesGroup.setVelocityX(-200);
     }
 
     getPipeRightMostX() {
@@ -213,6 +264,7 @@ export class GameScene extends BaseScene {
                     this.placePipe();
                     this.increaseScore();
                     this.saveBestScore();
+                    this.increaseDifficult();
                 }
             }
         });
@@ -221,5 +273,51 @@ export class GameScene extends BaseScene {
     increaseScore() {
         this.score++;
         this.scoreText.setText(`Score: ${this.score}`);
+    }
+
+    //listen event when resume
+    listenToEvents() {
+        if (this.pauseEvent) {
+            return;
+        }
+
+        this.pauseEvent = this.events.on("resume", () => {
+            this.initialTime = 3;
+            this.countDownText = this.add
+                .text(
+                    this.screenCenter[0],
+                    this.screenCenter[1],
+                    this.initialTime.toString(),
+                    this.fontOptions
+                )
+                .setOrigin(0.5);
+            this.timeEvent = this.time.addEvent({
+                delay: 1000,
+                callback: this.countDown,
+                callbackScope: this,
+                loop: true,
+            });
+        });
+    }
+
+    countDown() {
+        this.initialTime--;
+        this.countDownText.setText(this.initialTime);
+        if (this.initialTime <= 0) {
+            this.isPaused = false;
+            this.countDownText.setText("");
+            this.physics.resume();
+            this.timeEvent.remove();
+        }
+    }
+
+    increaseDifficult() {
+        if (this.score === 1) {
+            this.currentDifficulty = "normal";
+        }
+
+        if (this.score === 3) {
+            this.currentDifficulty = "hard";
+        }
     }
 }
