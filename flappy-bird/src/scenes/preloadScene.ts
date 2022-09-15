@@ -14,6 +14,7 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image(ImagesScene.Bird, "assets/bird.png");
         this.load.image(ImagesScene.Pipe, "assets/pipe.png");
         this.load.image(ImagesScene.Pause, "assets/pause.png");
+        this.load.image(ImagesScene.Back, "assets/back.png");
     }
 
     create() {

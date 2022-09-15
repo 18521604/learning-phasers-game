@@ -3,4 +3,5 @@ export enum ObjectImages {
     Bird = "bird",
     Pipe = "pipe",
     Pause = "pause",
+    Back = "back",
 }

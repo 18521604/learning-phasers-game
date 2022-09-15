@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { BestScoreScene } from "./scenes/bestScoreScene";
 import { GameScene } from "./scenes/gameScene";
 import { MenuScene } from "./scenes/menuScene";
 import { PreloadScene } from "./scenes/preloadScene";
@@ -15,7 +16,7 @@ window.onload = function () {
         birdPosition: BIRD_POSITION,
     };
 
-    const scenes = [PreloadScene, MenuScene, GameScene];
+    const scenes = [PreloadScene, MenuScene, BestScoreScene, GameScene];
     const createScene = (scene: any) => new scene(SHARED_CONFIG);
     const initScenes = scenes.map(createScene);
 

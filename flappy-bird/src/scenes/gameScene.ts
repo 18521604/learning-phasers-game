@@ -1,16 +1,13 @@
 /** @type {Phaser.Scene} */
 
-import Phaser from "phaser";
 import { ObjectImages as ImagesScene } from "../enum/objects";
+import { BaseScene } from "./baseScene";
 
 const VELOCITY = 10;
 const ACCELERATION = 100;
 const PIPES_TO_RENDER = 4;
 
-export class GameScene extends Phaser.Scene {
-    //config constructor
-    config: any;
-
+export class GameScene extends BaseScene {
     //Objects constructor
     bird: any;
     sky: any;
@@ -28,7 +25,7 @@ export class GameScene extends Phaser.Scene {
     flapVelocity: any;
 
     constructor(config: any) {
-        super("GameScene");
+        super("GameScene", config);
 
         this.config = config;
 
@@ -40,7 +37,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        this.createBackground();
+        super.create();
         this.createBirds();
         this.createPipes();
         this.createPause();
@@ -57,8 +54,8 @@ export class GameScene extends Phaser.Scene {
     createBackground() {
         this.sky = this.add.image(0, 0, ImagesScene.Sky);
         this.sky.setOrigin(0, 0);
-        this.sky.displayWidth = Number(this.game.config.width);
-        this.sky.displayHeight = Number(this.game.config.height);
+        this.sky.displayWidth = Number(this.config.width);
+        this.sky.displayHeight = Number(this.config.height);
     }
 
     createBirds() {
@@ -67,7 +64,7 @@ export class GameScene extends Phaser.Scene {
             this.config.birdPosition.y,
             ImagesScene.Bird
         );
-        this.bird.body.gravity.y = 400;
+        this.bird.body.gravity.y = 500;
         this.bird.setCollideWorldBounds(true);
     }
 
@@ -88,7 +85,7 @@ export class GameScene extends Phaser.Scene {
             .setScale(3)
             .setOrigin(1);
         this.pauseButton.depth = 5;
-        this.pauseButton.setInteractive(); 
+        this.pauseButton.setInteractive();
 
         this.pauseButton.on("pointerdown", () => {
             this.physics.pause();
@@ -132,7 +129,7 @@ export class GameScene extends Phaser.Scene {
 
     checkGameStatus() {
         if (
-            this.bird.getBounds().bottom >= this.game.config.height ||
+            this.bird.getBounds().bottom >= this.config.height ||
             this.bird.getBounds().top <= 0
         ) {
             this.gameOver();
@@ -195,7 +192,7 @@ export class GameScene extends Phaser.Scene {
             )
             .setImmovable(true)
             .setOrigin(0);
-        this.pipesGroup.setVelocityX(-200);
+        this.pipesGroup.setVelocityX(-300);
     }
 
     getPipeRightMostX() {

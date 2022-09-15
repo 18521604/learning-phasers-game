@@ -1,26 +1,39 @@
 /** @type {Phaser.Scene} */
 
-import Phaser from "phaser";
-import { ObjectImages as ImagesScene } from "../enum/objects";
+import { BaseScene } from "./baseScene";
 
-export class MenuScene extends Phaser.Scene {
-    config: any;
-    sky: any;
-
+export class MenuScene extends BaseScene {
+    private menu: Array<object>;
     constructor(config: any) {
-        super("MenuScene");
-        this.config = config;
+        super("MenuScene", config);
+        this.menu = [
+            { scene: "GameScene", text: "Play" },
+            { scene: "BestScoreScene", text: "Score" },
+            { scene: null, text: "Exit" },
+        ];
     }
 
     create() {
-        this.createBackground();
-        this.scene.start("GameScene");
+        super.create();
+
+        this.createMenu(this.menu, this.setUpMenuEvents.bind(this));
     }
 
-    createBackground() {
-        this.sky = this.add.image(0, 0, ImagesScene.Sky);
-        this.sky.setOrigin(0, 0);
-        this.sky.displayWidth = Number(this.game.config.width);
-        this.sky.displayHeight = Number(this.game.config.height);
+    setUpMenuEvents(menuItem: object) {
+        const textGameObj = menuItem["textGameObj"];
+        textGameObj.setInteractive();
+        textGameObj.on("pointerover", () => {
+            textGameObj.setStyle({ fill: "#CD00FF" });
+        });
+        textGameObj.on("pointerout", () => {
+            textGameObj.setStyle({ fill: "#fff" });
+        });
+        textGameObj.on("pointerdown", () => {
+            this.scene.start(menuItem["scene"]);
+
+            if (menuItem["text"] === "Exit") {
+                this.game.destroy(true);
+            }
+        });
     }
 }
