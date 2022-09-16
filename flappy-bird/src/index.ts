@@ -33,7 +33,7 @@ window.onload = function () {
         physics: {
             default: "arcade",
             arcade: {
-                debug: true,
+                // debug: tr ue,
             },
         },
         scene: initScenes,

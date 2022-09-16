@@ -195,12 +195,14 @@ export class GameScene extends BaseScene {
         this.bird.setTint(0x732335);
         this.saveBestScore();
 
-        this.add.text(
-            this.screenCenter[0],
-            this.screenCenter[1],
-            "GAME OVER!",
-            this.fontOptions
-        );
+        this.add
+            .text(
+                this.screenCenter[0],
+                this.screenCenter[1],
+                "GAME OVER!",
+                this.fontOptions
+            )
+            .setOrigin(0.5);
 
         this.time.addEvent({
             delay: 1000,
@@ -312,11 +314,11 @@ export class GameScene extends BaseScene {
     }
 
     increaseDifficult() {
-        if (this.score === 1) {
+        if (this.score === 10) {
             this.currentDifficulty = "normal";
         }
 
-        if (this.score === 3) {
+        if (this.score === 50) {
             this.currentDifficulty = "hard";
         }
     }
