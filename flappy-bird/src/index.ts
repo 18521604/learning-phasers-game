@@ -4,16 +4,15 @@ import { GameScene } from "./scenes/gameScene";
 import { MenuScene } from "./scenes/menuScene";
 import { PauseScene } from "./scenes/pauseScene";
 import { PreloadScene } from "./scenes/preloadScene";
+import CONFIG from "./config.js";
 
 let game: any;
 
 window.onload = function () {
-    const WIDTH = window.innerWidth;
-    const HEIGHT = 600;
-    const BIRD_POSITION = { x: WIDTH * 0.1, y: HEIGHT / 2 };
+    const BIRD_POSITION = { x: CONFIG.WIDTH * 0.1, y: CONFIG.HEIGHT / 2 };
     const SHARED_CONFIG = {
-        width: WIDTH,
-        height: HEIGHT,
+        width: CONFIG.WIDTH,
+        height: CONFIG.HEIGHT,
         birdPosition: BIRD_POSITION,
     };
 
@@ -33,7 +32,7 @@ window.onload = function () {
         physics: {
             default: "arcade",
             arcade: {
-                // debug: tr ue,
+                debug: true,
             },
         },
         scene: initScenes,
@@ -41,4 +40,25 @@ window.onload = function () {
     };
 
     game = new Phaser.Game(config);
+
+    window.focus();
+    resize();
+    window.addEventListener("resize", resize, false);
 };
+
+function resize() {
+    let canvas: any;
+    canvas = document.querySelector("canvas");
+    let windowWidth = window.innerWidth;
+    let windowHeight = window.innerHeight;
+    let windowRatio = windowWidth / windowHeight;
+    let gameRatio = Number(game.config.width) / Number(game.config.height);
+
+    if (windowRatio < gameRatio) {
+        canvas.style.width = windowWidth + "px";
+        canvas.style.height = windowWidth / gameRatio + "px";
+    } else {
+        canvas.style.width = windowHeight * gameRatio + "px";
+        canvas.style.height = windowHeight + "px";
+    }
+}

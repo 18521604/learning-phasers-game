@@ -15,10 +15,10 @@ export class BaseScene extends Phaser.Scene {
         super(key);
         this.config = config;
         this.screenCenter = [config.width / 2, config.height / 2];
-        this.fontSize = 32;
-        this.lineHeight = 42;
+        this.fontSize = 40;
+        this.lineHeight = 80;
         this.fontOptions = {
-            fontSize: `${this.fontSize}px`,
+            font: `${this.fontSize}px Arial`,
             fill: "#fff",
         };
     }
@@ -30,8 +30,6 @@ export class BaseScene extends Phaser.Scene {
     createBackground() {
         this.sky = this.add.image(0, 0, ImagesScene.Sky);
         this.sky.setOrigin(0, 0);
-        this.sky.displayWidth = Number(this.config.width);
-        this.sky.displayHeight = Number(this.config.height);
     }
 
     createMenu(menu: Array<object>, setupMenuEvents: any) {

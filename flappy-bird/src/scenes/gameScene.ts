@@ -11,6 +11,7 @@ export class GameScene extends BaseScene {
     //Objects constructor
     bird: any;
     sky: any;
+    cloud: any;
     pauseButton: any;
     isPaused: any;
 
@@ -29,20 +30,34 @@ export class GameScene extends BaseScene {
     timeEvent: any;
     pauseEvent: any;
 
-    //difficulty
-    currentDifficulty: any = "easy";
-    listDifficulties = {
-        easy: {
+    //Level
+    level: any = 1;
+    bestLevel: any;
+    listLevels = {
+        1: {
             pipeHorizontalDistanceRange: [400, 500],
-            pipeVerticalDistanceRange: [150, 200],
+            pipeVerticalDistanceRange: [250, 350],
+            pipeVelocity: 200,
         },
-        normal: {
-            pipeHorizontalDistanceRange: [280, 330],
-            pipeVerticalDistanceRange: [140, 190],
+        2: {
+            pipeHorizontalDistanceRange: [360, 460],
+            pipeVerticalDistanceRange: [210, 310],
+            pipeVelocity: 250,
         },
-        hard: {
-            pipeHorizontalDistanceRange: [250, 310],
-            pipeVerticalDistanceRange: [130, 180],
+        3: {
+            pipeHorizontalDistanceRange: [340, 440],
+            pipeVerticalDistanceRange: [180, 270],
+            pipeVelocity: 330,
+        },
+        4: {
+            pipeHorizontalDistanceRange: [320, 400],
+            pipeVerticalDistanceRange: [180, 250],
+            pipeVelocity: 360,
+        },
+        5: {
+            pipeHorizontalDistanceRange: [300, 380],
+            pipeVerticalDistanceRange: [180, 230],
+            pipeVelocity: 400,
         },
     };
 
@@ -51,14 +66,15 @@ export class GameScene extends BaseScene {
 
         this.config = config;
 
-        this.flapVelocity = 300;
+        this.flapVelocity = 600;
 
         this.score = 0;
     }
 
     create() {
-        this.currentDifficulty = "easy";
+        this.level = 1;
         super.create();
+        this.createCloud();
         this.createBirds();
         this.createPipes();
         this.createPause();
@@ -83,13 +99,12 @@ export class GameScene extends BaseScene {
     update(time: number, delta: number): void {
         this.checkGameStatus();
         this.recyclePipes();
+        this.updatePositionCloud();
     }
 
     createBackground() {
         this.sky = this.add.image(0, 0, ImagesScene.Sky);
         this.sky.setOrigin(0, 0);
-        this.sky.displayWidth = Number(this.config.width);
-        this.sky.displayHeight = Number(this.config.height);
     }
 
     createBirds() {
@@ -100,10 +115,25 @@ export class GameScene extends BaseScene {
                 ImagesScene.Bird
             )
             .setFlipX(true)
-            .setScale(3);
+            .setScale(5);
         this.bird.setBodySize(this.bird.width, this.bird.height - 8);
-        this.bird.body.gravity.y = 400;
+        this.bird.body.gravity.y = 2000;
         this.bird.setCollideWorldBounds(true);
+    }
+
+    createCloud() {
+        this.cloud = this.add.tileSprite(
+            0,
+            100,
+            this.config.width,
+            500,
+            ImagesScene.Cloud
+        );
+        this.cloud.setOrigin(0);
+    }
+
+    updatePositionCloud() {
+        this.cloud.tilePositionX += 1;
     }
 
     createPipes() {
@@ -120,7 +150,7 @@ export class GameScene extends BaseScene {
                 this.config.height - 10,
                 ImagesScene.Pause
             )
-            .setScale(3)
+            .setScale(5)
             .setOrigin(1);
         this.pauseButton.depth = 5;
         this.pauseButton.setInteractive();
@@ -134,22 +164,22 @@ export class GameScene extends BaseScene {
     }
 
     createScore() {
-        this.score = 0;
-        this.scoreText = this.add.text(16, 16, `Score: ${this.score}`, {
-            fontSize: "32px",
-        });
-
         this.bestScore = localStorage.getItem("bestScore");
-        this.bestScoreText = this.add.text(
+        this.bestLevel = localStorage.getItem("bestLevel");
+        this.scoreText = this.add.text(
             16,
-            50,
-            `Record: ${this.bestScore || 0}`,
+            16,
+            `Score: ${this.score}/ Best score: ${this.bestScore || 0}\nLevel: ${
+                this.level
+            }/ Best Level: ${this.bestLevel || 1}`,
             {
-                fontSize: "16px",
+                font: "32px Arial",
+                lineSpacing: 10,
+                color: "#67EF75",
             }
         );
 
-        this.scoreText.depth = this.bestScoreText.depth = 5;
+        this.scoreText.depth = 5;
     }
 
     handleInputs() {
@@ -183,17 +213,24 @@ export class GameScene extends BaseScene {
         this.bird.body.velocity.y = -this.flapVelocity;
     }
 
-    saveBestScore() {
+    saveBestScoreAndLevel() {
         this.bestScore = Number(localStorage.getItem("bestScore"));
         if (!this.bestScore || this.score > this.bestScore) {
             localStorage.setItem("bestScore", this.score);
+        }
+
+        //Save best level
+        this.bestLevel = Number(localStorage.getItem("bestLevel"));
+        if (!this.bestLevel || this.level > this.bestLevel) {
+            localStorage.setItem("bestLevel", this.level);
         }
     }
 
     gameOver() {
         this.physics.pause();
         this.bird.setTint(0x732335);
-        this.saveBestScore();
+        this.score = 0;
+        this.saveBestScoreAndLevel();
 
         this.add
             .text(
@@ -203,11 +240,10 @@ export class GameScene extends BaseScene {
                 this.fontOptions
             )
             .setOrigin(0.5);
-
+        this.cameras.main.shake(1000, 0.005);
         this.time.addEvent({
             delay: 1000,
             callback: () => {
-                // this.scene.restart();
                 this.scene.start("MenuScene");
             },
             loop: false,
@@ -215,19 +251,19 @@ export class GameScene extends BaseScene {
     }
 
     placePipe() {
-        const difficulty = this.listDifficulties[this.currentDifficulty];
+        const tempLevel = this.listLevels[this.level];
         const pipeRightMostX = this.getPipeRightMostX();
         const pipeVerticalDistance = Phaser.Math.Between(
-            difficulty.pipeVerticalDistanceRange[0],
-            difficulty.pipeVerticalDistanceRange[1]
+            tempLevel.pipeVerticalDistanceRange[0],
+            tempLevel.pipeVerticalDistanceRange[1]
         );
         const pipeVerticalPosition = Phaser.Math.Between(
-            0 + 20,
-            Number(this.config.height) - 20 - pipeVerticalDistance
+            0 + 300,
+            Number(this.config.height) - 300 - pipeVerticalDistance
         );
         const pipeHorizontalDistance = Phaser.Math.Between(
-            difficulty.pipeHorizontalDistanceRange[0],
-            difficulty.pipeHorizontalDistanceRange[1]
+            tempLevel.pipeHorizontalDistanceRange[0],
+            tempLevel.pipeHorizontalDistanceRange[1]
         );
         const upperPipe = this.pipesGroup
             .create(
@@ -235,6 +271,7 @@ export class GameScene extends BaseScene {
                 pipeVerticalPosition,
                 ImagesScene.Pipe
             )
+            .setFlipY(true)
             .setImmovable(true)
             .setOrigin(0, 1);
         const lowerPipe = this.pipesGroup
@@ -245,7 +282,10 @@ export class GameScene extends BaseScene {
             )
             .setImmovable(true)
             .setOrigin(0);
-        this.pipesGroup.setVelocityX(-200);
+
+        upperPipe.setBodySize(upperPipe.width - 4, upperPipe.height);
+        lowerPipe.setBodySize(lowerPipe.width - 4, lowerPipe.height);
+        this.pipesGroup.setVelocityX(-tempLevel.pipeVelocity);
     }
 
     getPipeRightMostX() {
@@ -259,14 +299,13 @@ export class GameScene extends BaseScene {
     recyclePipes() {
         let tempPipes: any = [];
         this.pipesGroup.getChildren().forEach((pipe: any) => {
-            if (pipe.getBounds().right <= 0) {
+            if (pipe.getBounds().left <= 0) {
                 tempPipes.push(pipe);
                 if (tempPipes.length === 2) {
                     this.pipesGroup.getChildren().splice(0, 2);
                     this.placePipe();
                     this.increaseScore();
-                    this.saveBestScore();
-                    this.increaseDifficult();
+                    this.increaseLevel();
                 }
             }
         });
@@ -274,7 +313,9 @@ export class GameScene extends BaseScene {
 
     increaseScore() {
         this.score++;
-        this.scoreText.setText(`Score: ${this.score}`);
+        this.scoreText.destroy();
+        this.saveBestScoreAndLevel();
+        this.createScore();
     }
 
     //listen event when resume
@@ -290,7 +331,7 @@ export class GameScene extends BaseScene {
                     this.screenCenter[0],
                     this.screenCenter[1],
                     this.initialTime.toString(),
-                    this.fontOptions
+                    { font: "80px Arial" }
                 )
                 .setOrigin(0.5);
             this.timeEvent = this.time.addEvent({
@@ -313,13 +354,22 @@ export class GameScene extends BaseScene {
         }
     }
 
-    increaseDifficult() {
-        if (this.score === 10) {
-            this.currentDifficulty = "normal";
-        }
-
-        if (this.score === 50) {
-            this.currentDifficulty = "hard";
+    increaseLevel() {
+        switch (this.score) {
+            case 10:
+                this.level = 2;
+                break;
+            case 50:
+                this.level = 3;
+                break;
+            case 100:
+                this.level = 4;
+                break;
+            case 150:
+                this.level = 5;
+                break;
+            default:
+                break;
         }
     }
 }
