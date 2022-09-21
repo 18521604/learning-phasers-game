@@ -25,7 +25,7 @@ export default (anims: Phaser.Animations.AnimationManager) => {
             start: 17,
             end: 23,
         }),
-        frameRate: 8,
+        frameRate: 5,
         repeat: -1,
     });
 };

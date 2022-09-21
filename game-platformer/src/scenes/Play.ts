@@ -4,7 +4,7 @@ import Phaser from "phaser";
 import Player from "../entities/Player";
 
 export default class Play extends Phaser.Scene {
-    private player: Phaser.Physics.Arcade.Sprite;
+    // private player: Phaser.Physics.Arcade.Sprite;
     constructor() {
         super("PlayScene");
     }
@@ -12,15 +12,14 @@ export default class Play extends Phaser.Scene {
     create() {
         const map = this.createMap();
         const layers = this.createLayer(map);
-        this.player = this.createPlayer();
+        const player = this.createPlayer();
 
-        this.physics.add.collider(this.player, layers.platformsColliders);
+        player.addCollider(layers.platformsColliders);
     }
 
     createMap() {
         const map = this.make.tilemap({ key: "map" });
         map.addTilesetImage("main_lev_build_1", "tiles-1");
-        map.addTilesetImage("main_lev_build_2", "tiles-2");
         return map;
     }
 
