@@ -1,20 +1,45 @@
 /** @type {Phaser.Scene} */
 
 import Phaser from "phaser";
+import Player from "../entities/Player";
 
 export default class Play extends Phaser.Scene {
+    private player: Phaser.Physics.Arcade.Sprite;
     constructor() {
         super("PlayScene");
     }
 
-    preload() {
-        this.load.setBaseURL("http://172.27.57.191:5501/game-platformer");
-        this.load.image("sky", "assets/sky.png");
-    }
-
     create() {
-        this.add.image(0, 0, "sky").setOrigin(0);
+        const map = this.createMap();
+        const layers = this.createLayer(map);
+        this.player = this.createPlayer();
+
+        this.physics.add.collider(this.player, layers.platformsColliders);
     }
 
-    update() {}
+    createMap() {
+        const map = this.make.tilemap({ key: "map" });
+        map.addTilesetImage("main_lev_build_1", "tiles-1");
+        map.addTilesetImage("main_lev_build_2", "tiles-2");
+        return map;
+    }
+
+    createLayer(map: any) {
+        const tileset = map.getTileset("main_lev_build_1");
+        const platformsColliders = map.createStaticLayer(
+            "platforms_colliders",
+            tileset
+        );
+        const environment = map.createStaticLayer("environment", tileset);
+        const platforms = map.createStaticLayer("platforms", tileset);
+
+        //Set collision
+        platformsColliders.setCollisionByProperty({ collides: true });
+
+        return { environment, platforms, platformsColliders };
+    }
+
+    createPlayer() {
+        return new Player(this, 100, 200);
+    }
 }
