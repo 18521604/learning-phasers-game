@@ -4,9 +4,10 @@ import Phaser from "phaser";
 import Player from "../entities/Player";
 
 export default class Play extends Phaser.Scene {
-    // private player: Phaser.Physics.Arcade.Sprite;
-    constructor() {
+    private config: any;
+    constructor(config: any) {
         super("PlayScene");
+        this.config = config;
     }
 
     create() {
@@ -14,7 +15,11 @@ export default class Play extends Phaser.Scene {
         const layers = this.createLayer(map);
         const player = this.createPlayer();
 
-        player.addCollider(layers.platformsColliders);
+        this.createPlayerColliders(player, {
+            colliders: { platformsColliders: layers.platformsColliders },
+        });
+
+        this.setupFollowupCameraOn(player);
     }
 
     createMap() {
@@ -40,5 +45,18 @@ export default class Play extends Phaser.Scene {
 
     createPlayer() {
         return new Player(this, 100, 200);
+    }
+
+    createPlayerColliders(player: any, { colliders }) {
+        player.addCollider(colliders.platformsColliders);
+    }
+
+    setupFollowupCameraOn(player: Phaser.Physics.Arcade.Sprite) {
+        const { width, height, mapOffset, zoomFactor } = this.config;
+        this.physics.world.setBounds(0, 0, width + mapOffset, height + 200);
+        this.cameras.main
+            .setBounds(0, 0, width + mapOffset, height)
+            .setZoom(zoomFactor);
+        this.cameras.main.startFollow(player);
     }
 }

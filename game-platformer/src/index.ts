@@ -5,11 +5,15 @@ import Preload from "./scenes/Preload";
 let game: any;
 
 window.onload = function () {
-    const WIDTH = 1600;
+    const MAP_WIDTH = 1600;
+
+    const WIDTH = document.body.offsetWidth;
     const HEIGHT = 640;
     const SHARED_CONFIG = {
+        mapOffset: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
         width: WIDTH,
         height: HEIGHT,
+        zoomFactor: 1.5,
     };
 
     const scenes = [Preload, PlayScene];
