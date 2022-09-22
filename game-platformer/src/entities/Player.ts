@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { listObjects } from "../enum";
+import { listEntities } from "../types";
 import initAminations from "./playerAnims";
 
 import collidable from "../mixins/collidable";
@@ -9,14 +9,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     private gravity: number;
     private speed: number;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    scene: Phaser.Scene;
 
     private jumpCount: number;
     private consecutiveJump: number;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
-        super(scene, x, y, listObjects.Player);
-        this.scene = scene;
+        super(scene, x, y, listEntities.Player);
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
@@ -32,10 +30,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.consecutiveJump = 1;
         this.gravity = 500;
         this.speed = 150;
-
         this.cursors = this.scene.input.keyboard.createCursorKeys();
+
         this.setGravityY(this.gravity);
         this.setCollideWorldBounds(true);
+
+        this.setSize(20, 35);
+        this.setOrigin(0.5, 1);
 
         initAminations(this.scene.anims);
     }

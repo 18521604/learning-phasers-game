@@ -7,5 +7,6 @@ export default {
             null,
             this
         );
+        return this;
     },
 };

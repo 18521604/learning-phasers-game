@@ -1,15 +1,15 @@
 import Phaser from "phaser";
 import PlayScene from "./scenes/Play";
 import Preload from "./scenes/Preload";
+import shared_config from "./Schemas/config";
 
 let game: any;
 
 window.onload = function () {
     const MAP_WIDTH = 1600;
-
     const WIDTH = document.body.offsetWidth;
     const HEIGHT = 640;
-    const SHARED_CONFIG = {
+    const SHARED_CONFIG: shared_config = {
         mapOffset: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
         width: WIDTH,
         height: HEIGHT,

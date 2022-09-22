@@ -1,9 +1,9 @@
-import { listObjects } from "../enum";
+import { listEntities } from "../types";
 
 export default (anims: Phaser.Animations.AnimationManager) => {
     anims.create({
         key: "idle",
-        frames: anims.generateFrameNumbers(listObjects.Player, {
+        frames: anims.generateFrameNumbers(listEntities.Player, {
             start: 0,
             end: 8,
         }),
@@ -12,7 +12,7 @@ export default (anims: Phaser.Animations.AnimationManager) => {
     });
     anims.create({
         key: "run",
-        frames: anims.generateFrameNumbers(listObjects.Player, {
+        frames: anims.generateFrameNumbers(listEntities.Player, {
             start: 11,
             end: 16,
         }),
@@ -21,7 +21,7 @@ export default (anims: Phaser.Animations.AnimationManager) => {
     });
     anims.create({
         key: "jump",
-        frames: anims.generateFrameNumbers(listObjects.Player, {
+        frames: anims.generateFrameNumbers(listEntities.Player, {
             start: 17,
             end: 23,
         }),
