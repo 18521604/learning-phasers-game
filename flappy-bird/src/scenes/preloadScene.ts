@@ -9,7 +9,7 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.setBaseURL("http://172.27.57.191:5501/flappy-bird");
+        // this.load.setBaseURL("http://172.27.57.191:5501/flappy-bird");
         this.load.image(ImagesScene.Sky, "assets/sky-2.png");
         this.load.image(ImagesScene.Cloud, "assets/cloud-2.png");
         this.load.spritesheet(ImagesScene.Bird, "assets/birdSprite.png", {
