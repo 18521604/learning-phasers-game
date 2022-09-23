@@ -6,7 +6,7 @@ import { PauseScene } from "./scenes/pauseScene";
 import { PreloadScene } from "./scenes/preloadScene";
 import CONFIG from "./config.js";
 
-let game: any;
+let game: Phaser.Game;
 
 window.onload = function () {
     const BIRD_POSITION = { x: CONFIG.WIDTH * 0.1, y: CONFIG.HEIGHT / 2 };
